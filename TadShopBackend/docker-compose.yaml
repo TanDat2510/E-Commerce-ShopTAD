@@ -1,0 +1,69 @@
+services:
+  springboot:
+    build:
+      context: ./TadShopBackend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_REDIS_HOST: ${SPRING_REDIS_HOST}
+      SPRING_REDIS_PORT: ${SPRING_REDIS_PORT}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+#  nextjs:
+#    build:
+#      context: ./LavenFontend/lavenshop
+#      dockerfile: Dockerfile
+#    ports:
+#      - "3000:3000"
+
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./database/tadshop_db.sql:/docker-entrypoint-initdb.d/tadshop_db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+#  jenkins:
+#    image: jenkins/jenkins:lts
+#    user: root # Chạy với quyền root để đảm bảo cài đặt Docker CLI
+#    ports:
+#      - "8081:8080"
+#      - "50000:50000"
+#    volumes:
+#      - jenkins_home:/var/jenkins_home
+#      - /var/run/docker.sock:/var/run/docker.sock # Kết nối Docker socket
+#      - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose # Mount Docker Compose nếu cần
+#    environment:
+#      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false" # Tắt wizard ban đầu
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      redis:
+#        condition: service_started
+
+volumes:
+  mysql_data:
+  redis_data:
+  jenkins_home:
