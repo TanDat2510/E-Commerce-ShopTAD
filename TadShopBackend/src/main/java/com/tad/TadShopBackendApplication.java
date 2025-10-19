@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TadShopBackendApplication {
 
 	public static void main(String[] args) {
-        System.out.println(">>> ENV TEST: " + System.getenv("${SPRING_DATASOURCE_URL}"));
+        System.out.println(">>> ENV TEST: " + System.getenv("MYSQL_DATABASE"));
         SpringApplication.run(TadShopBackendApplication.class, args);
 	}
 
