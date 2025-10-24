@@ -37,6 +37,7 @@ public class CategoryController {
         return new ResponseEntity<>(this.categoryService.getAllCategories(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);
     }
 
+    //Build Update Category REST API
     @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryDto> updateCategory(
             @PathVariable(name = "categoryId") Long id,

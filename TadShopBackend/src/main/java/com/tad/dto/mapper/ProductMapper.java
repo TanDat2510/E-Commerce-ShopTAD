@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class ProductMapper {
     private ModelMapper mapper;
+
     public ProductDto mapToDto(Product product){
         ProductDto productDto = mapper.map(product, ProductDto.class);
         return productDto;
