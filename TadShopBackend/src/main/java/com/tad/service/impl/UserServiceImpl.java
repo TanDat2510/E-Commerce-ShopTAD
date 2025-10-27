@@ -43,8 +43,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User newUser = this.userMapper.mapToEntity(userDto);
-
         newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
         Set<Role> roles = new HashSet<>();
         Role userRole = this.roleRepository.findByName("USER").get();
         roles.add(userRole);

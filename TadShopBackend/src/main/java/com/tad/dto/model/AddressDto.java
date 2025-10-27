@@ -1,17 +1,11 @@
-package com.tad.entity;
+package com.tad.dto.model;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "address")
-public class Address {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AddressDto {
     private long id;
 
     private String name;
@@ -22,9 +16,4 @@ public class Address {
     private String ward;
     private String address;
     private String addressType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
 }
