@@ -1,5 +1,6 @@
 package com.tad.service.impl;
 
+import com.tad.dto.exception.ResourceNotFoundException;
 import com.tad.dto.exception.TadAPIException;
 import com.tad.dto.mapper.UserMapper;
 import com.tad.dto.model.UserDto;
@@ -85,31 +86,80 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long id) {
-        return null;
+        User user = this.userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        return this.userMapper.mapToDto(user);
     }
 
     @Override
     public UserDto getUserByUsername(String userName) {
-        return null;
+        User user = this.userRepository.findByUsername(userName);
+        return this.userMapper.mapToDto(user);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, Long userId) {
-        return null;
+        // check thong tin Username co ton tai trong database hay khong
+        if(this.userRepository.existsByUsername(userDto.getUsername())){
+            throw new TadAPIException(HttpStatus.BAD_REQUEST, "Username is already exists!");
+        }
+
+        // check thong tin Email co ton tai trong database hay khong
+        if(this.userRepository.existsByEmail(userDto.getEmail())){
+            throw new TadAPIException(HttpStatus.BAD_REQUEST, "Email is already exists!");
+        }
+
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        user.setName(userDto.getName());
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        this.userRepository.save(user);
+
+        return this.userMapper.mapToDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        this.userRepository.delete(user);
     }
 
     @Override
     public UserDto getUserProfile(Long userId) {
-        return null;
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        return this.userMapper.mapToDto(user);
     }
 
     @Override
     public ObjectResponse<UserDto> searchUser(String name, int pageNo, int pageSize, String sortBy, String sortDir) {
-        return null;
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        // Tao 1 pageable instance
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
+        Page<User> pages = this.userRepository.searchUserByName(name, pageable);
+
+        // Lay ra gia tri (content) cua page
+        List<User> users = pages.getContent();
+
+        // Ep kieu sang dto
+        List<UserDto> content = users.stream().map(user -> userMapper.mapToDto(user)).collect(Collectors.toList());
+
+        // Gan gia tri (content) cua page vao ProductResponse de tra ve
+        ObjectResponse<UserDto> response = new ObjectResponse();
+        response.setContent(content);
+        response.setTotalElements(pages.getTotalElements());
+        response.setPageNo(pages.getNumber());
+        response.setPageSize(pages.getSize());
+        response.setLast(pages.isLast());
+        response.setTotalPages(pages.getTotalPages());
+        return response;
     }
 }
